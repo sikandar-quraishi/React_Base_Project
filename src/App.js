@@ -12,32 +12,47 @@ import About from "./components/pages/About";
 class App extends React.Component {
   state = {
     users: [],
+    repos: [],
     user: {},
     loading: false,
-    alert: null,
+    alert: null
   };
+
 
 
   // Search Github Users --->  Passing Prop Up   =====child to parent props=====
   searchUsers = async (text) => {
     this.setState({ loading: true });
-    const res = await axios.get(`https://api.github.com/search/users?q=${text}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`);
+    const res = await axios.get(
+      `https://api.github.com/search/users?q=${text}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+    );
     this.setState({ users: res.data.items, loading: false });
   };
 
 
 
-  
-  // Get Singel Users --->  Passing Prop Up   =====child to parent props=====
+  // Get Singel User --->  Passing Prop Up   =====child to parent props=====
   getUser = async (username) => {
     this.setState({ loading: true });
-    const res = await axios.get(`https://api.github.com/users/${username}?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`);
+    const res = await axios.get(
+      `https://api.github.com/users/${username}?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+    );
     this.setState({ user: res.data, loading: false });
   };
 
 
 
+  // Get Singel User Repos--->  Passing Prop Up   =====child to parent props=====
+  getUserRepos = async (username) => {
+    this.setState({ loading: true });
+    const res = await axios.get(
+      `https://api.github.com/users/${username}/repos?per_page=5&sort_created:asc&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+    );
+    this.setState({ repos: res.data, loading: false });
+  };
 
+
+  
   // Clear Users from state             =====child to parent props=====
   clearUsers = () => {
     this.setState({ users: [], loading: false });
@@ -55,7 +70,7 @@ class App extends React.Component {
 
 
   render() {
-    const { users, user, loading } = this.state;
+    const { users, user, loading, repos } = this.state;
     return (
       <Router>
         <div className="App">
@@ -79,9 +94,20 @@ class App extends React.Component {
                 )}
               />
               <Route exact path="/about" component={About} />
-              <Route exact path="/user/:login" render={(props)=> (
-                <User {...props} getUser={this.getUser} user={user} loading={loading} />
-              )} />
+              <Route
+                exact
+                path="/user/:login"
+                render={(props) => (
+                  <User
+                    {...props}
+                    getUser={this.getUser}
+                    getUserRepos={this.getUserRepos}
+                    user={user}
+                    repos={repos}
+                    loading={loading}
+                  />
+                )}
+              />
             </Switch>
           </div>
         </div>
